@@ -1,19 +1,20 @@
+// ignore_for_file: require_trailing_commas
 // Copyright 2017, the Chromium project authors.  Please see the AUTHORS file
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
 import 'package:firebase_storage_platform_interface/firebase_storage_platform_interface.dart';
-import 'package:firebase/firebase.dart' as fb;
+import '../interop/storage.dart' as storage_interop;
 
 import '../list_result_web.dart';
 
 /// Converts ListOptions from the plugin to ListOptions for the JS interop layer.
-fb.ListOptions listOptionsToFbListOptions(ListOptions options) {
+storage_interop.ListOptions? listOptionsToFbListOptions(ListOptions? options) {
   if (options == null) {
     return null;
   }
 
-  return fb.ListOptions(
+  return storage_interop.ListOptions(
     maxResults: options.maxResults,
     pageToken: options.pageToken,
   );
@@ -21,16 +22,11 @@ fb.ListOptions listOptionsToFbListOptions(ListOptions options) {
 
 /// Converts a ListResult from the JS interop layer to a ListResultWeb for the plugin.
 ListResultWeb fbListResultToListResultWeb(
-    FirebaseStoragePlatform storage, fb.ListResult result) {
-  if (result == null) {
-    return null;
-  }
-
+    FirebaseStoragePlatform storage, storage_interop.ListResult result) {
   return ListResultWeb(
     storage,
     nextPageToken: result.nextPageToken,
-    items: result.items?.map<String>((item) => item.fullPath)?.toList(),
-    prefixes:
-        result.prefixes?.map<String>((prefix) => prefix.fullPath)?.toList(),
+    items: result.items.map<String>((item) => item.fullPath).toList(),
+    prefixes: result.prefixes.map<String>((prefix) => prefix.fullPath).toList(),
   );
 }

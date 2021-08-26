@@ -53,7 +53,7 @@ Future<UserCredential> signInWithGoogle() async {
   final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
   // Create a new credential
-  final GoogleAuthCredential credential = GoogleAuthProvider.credential(
+  final credential = GoogleAuthProvider.credential(
     accessToken: googleAuth.accessToken,
     idToken: googleAuth.idToken,
   );
@@ -138,14 +138,13 @@ import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
 Future<UserCredential> signInWithFacebook() async {
   // Trigger the sign-in flow
-  final LoginResult result = await FacebookAuth.instance.login();
+  final LoginResult loginResult = await FacebookAuth.instance.login();
 
   // Create a credential from the access token
-  final FacebookAuthCredential facebookAuthCredential =
-    FacebookAuthProvider.credential(result.accessToken.token);
+  final OAuthCredential facebookAuthCredential = FacebookAuthProvider.credential(loginResult.accessToken.token);
 
   // Once signed in, return the UserCredential
-  return await FirebaseAuth.instance.signInWithCredential(facebookAuthCredential);
+  return FirebaseAuth.instance.signInWithCredential(facebookAuthCredential);
 }
 ```
 
@@ -193,6 +192,13 @@ Future<UserCredential> signInWithFacebook() async {
 
 </TabItem>
 </Tabs>
+
+:::caution
+Firebase will not set the `User.emailVerified` property
+to `true` if your user logs in with Facebook. Should your user login using a provider that verifies email (e.g. Google sign-in) then this will be set to true.
+For further information, see this [issue](https://github.com/FirebaseExtended/flutterfire/issues/4612#issuecomment-782107867).
+:::
+
 
 ## Apple
 
@@ -251,7 +257,7 @@ String sha256ofString(String input) {
 
 Future<UserCredential> signInWithApple() async {
   // To prevent replay attacks with the credential returned from Apple, we
-  // include a nonce in the credential request. When signing in in with
+  // include a nonce in the credential request. When signing in with
   // Firebase, the nonce in the id token returned by Apple, is expected to
   // match the sha256 hash of `rawNonce`.
   final rawNonce = generateNonce();
@@ -353,8 +359,10 @@ Future<UserCredential> signInWithTwitter() async {
   final TwitterSession twitterSession = loginResult.session;
 
   // Create a credential from the access token
-  final AuthCredential twitterAuthCredential =
-    TwitterAuthProvider.credential(accessToken: twitterSession.token, secret: twitterSession.secret);
+  final twitterAuthCredential = TwitterAuthProvider.credential(
+    accessToken: twitterSession.token,
+    secret: twitterSession.secret,
+  );
 
   // Once signed in, return the UserCredential
   return await FirebaseAuth.instance.signInWithCredential(twitterAuthCredential);
@@ -434,7 +442,7 @@ Future<UserCredential> signInWithGitHub() async {
   final result = await gitHubSignIn.signIn(context);
 
   // Create a credential from the access token
-  final AuthCredential githubAuthCredential = GithubAuthProvider.credential(result.token);
+  final githubAuthCredential = GithubAuthProvider.credential(result.token);
 
   // Once signed in, return the UserCredential
   return await FirebaseAuth.instance.signInWithCredential(githubAuthCredential);

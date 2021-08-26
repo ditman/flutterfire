@@ -1,3 +1,4 @@
+// ignore_for_file: require_trailing_commas
 // Copyright 2020, the Chromium project authors.  Please see the AUTHORS file
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
@@ -5,7 +6,7 @@
 import 'package:firebase_messaging_platform_interface/firebase_messaging_platform_interface.dart';
 
 /// Defines a handler for incoming remote message payloads.
-typedef Future<void> BackgroundMessageHandler(RemoteMessage message);
+typedef BackgroundMessageHandler = Future<void> Function(RemoteMessage message);
 
 /// An enum representing a notification setting for this app on the device.
 enum AppleNotificationSetting {

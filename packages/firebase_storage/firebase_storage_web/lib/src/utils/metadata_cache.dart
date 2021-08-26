@@ -1,3 +1,4 @@
+// ignore_for_file: require_trailing_commas
 // Copyright 2017, the Chromium project authors.  Please see the AUTHORS file
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
@@ -19,7 +20,7 @@ class SettableMetadataCache {
   ///
   /// Returns an updated SettableMetadata object, after merging the current cache
   /// with `incoming`.
-  SettableMetadata store(SettableMetadata incoming, {bool overwrite = false}) {
+  SettableMetadata store(SettableMetadata? incoming, {bool overwrite = false}) {
     if (overwrite) {
       // Prevent the internal cache from becoming null when store
       // is called with incoming = null and overwrite = true.

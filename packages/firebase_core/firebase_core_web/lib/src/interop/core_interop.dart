@@ -1,8 +1,9 @@
+// ignore_for_file: require_trailing_commas
 // Copyright 2020 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: public_member_api_docs
+// ignore_for_file: public_member_api_docs, non_constant_identifier_names
 
 @JS('firebase')
 library firebase_interop.core;
@@ -21,10 +22,10 @@ external List<AppJsImpl> get apps;
 external String get SDK_VERSION;
 
 @JS()
-external AppJsImpl initializeApp(FirebaseOptions options, [String name]);
+external AppJsImpl initializeApp(FirebaseOptions options, [String? name]);
 
 @JS()
-external AppJsImpl app([String name]);
+external AppJsImpl app([String? name]);
 
 /// FirebaseError is a subclass of the standard Error object.
 /// In addition to a message string, it contains a string-valued code.
@@ -46,6 +47,17 @@ abstract class FirebaseError {
 @JS()
 @anonymous
 class FirebaseOptions {
+  external factory FirebaseOptions({
+    String? apiKey,
+    String? authDomain,
+    String? databaseURL,
+    String? projectId,
+    String? storageBucket,
+    String? messagingSenderId,
+    String? measurementId,
+    String? appId,
+  });
+
   external String get apiKey;
   external set apiKey(String s);
   external String get authDomain;
@@ -62,14 +74,4 @@ class FirebaseOptions {
   external set measurementId(String s);
   external String get appId;
   external set appId(String s);
-
-  external factory FirebaseOptions(
-      {String apiKey,
-      String authDomain,
-      String databaseURL,
-      String projectId,
-      String storageBucket,
-      String messagingSenderId,
-      String measurementId,
-      String appId});
 }

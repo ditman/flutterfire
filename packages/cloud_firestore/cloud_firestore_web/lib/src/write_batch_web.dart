@@ -1,13 +1,14 @@
+// ignore_for_file: require_trailing_commas
 // Copyright 2017, the Chromium project authors.  Please see the AUTHORS file
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
 import 'package:cloud_firestore_platform_interface/cloud_firestore_platform_interface.dart';
 
+import 'internals.dart';
 import 'interop/firestore.dart' as firestore_interop;
 import 'utils/web_utils.dart';
-import 'utils/exception.dart';
-import 'utils/codec_utility.dart';
+import 'utils/encode_utility.dart';
 
 /// A web specific implementation of [WriteBatch].
 class WriteBatchWeb extends WriteBatchPlatform {
@@ -16,16 +17,12 @@ class WriteBatchWeb extends WriteBatchPlatform {
 
   /// Constructor.
   WriteBatchWeb(this._webFirestoreDelegate)
-      : _webWriteBatchDelegate = _webFirestoreDelegate.batch(),
+      : _webWriteBatchDelegate = _webFirestoreDelegate.batch()!,
         super();
 
   @override
-  Future<void> commit() async {
-    try {
-      await _webWriteBatchDelegate.commit();
-    } catch (e) {
-      throw getFirebaseException(e);
-    }
+  Future<void> commit() {
+    return guard(_webWriteBatchDelegate.commit);
   }
 
   @override
@@ -35,9 +32,9 @@ class WriteBatchWeb extends WriteBatchPlatform {
 
   @override
   void set(String documentPath, Map<String, dynamic> data,
-      [SetOptions options]) {
+      [SetOptions? options]) {
     _webWriteBatchDelegate.set(_webFirestoreDelegate.doc(documentPath),
-        CodecUtility.encodeMapData(data), convertSetOptions(options));
+        EncodeUtility.encodeMapData(data)!, convertSetOptions(options));
   }
 
   @override
@@ -46,6 +43,6 @@ class WriteBatchWeb extends WriteBatchPlatform {
     Map<String, dynamic> data,
   ) {
     _webWriteBatchDelegate.update(_webFirestoreDelegate.doc(documentPath),
-        data: CodecUtility.encodeMapData(data));
+        EncodeUtility.encodeMapData(data)!);
   }
 }

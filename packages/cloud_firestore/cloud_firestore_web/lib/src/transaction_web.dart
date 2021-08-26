@@ -1,13 +1,14 @@
+// ignore_for_file: require_trailing_commas
 // Copyright 2017, the Chromium project authors.  Please see the AUTHORS file
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
 import 'package:cloud_firestore_platform_interface/cloud_firestore_platform_interface.dart';
 
+import 'internals.dart';
 import 'interop/firestore.dart' as firestore_interop;
-import 'utils/codec_utility.dart';
+import 'utils/encode_utility.dart';
 import 'utils/web_utils.dart';
-import 'utils/exception.dart';
 
 /// A web specific implementation of [Transaction].
 class TransactionWeb extends TransactionPlatform {
@@ -28,22 +29,27 @@ class TransactionWeb extends TransactionPlatform {
   }
 
   @override
-  Future<DocumentSnapshotPlatform> get(String documentPath) async {
-    try {
-      final webDocumentSnapshot = await _webTransactionDelegate
-          .get(_webFirestoreDelegate.doc(documentPath));
-
-      return convertWebDocumentSnapshot(this._firestore, webDocumentSnapshot);
-    } catch (e) {
-      throw getFirebaseException(e);
-    }
+  Future<DocumentSnapshotPlatform> get(String documentPath) {
+    return guard(
+      () async {
+        final webDocumentSnapshot = await _webTransactionDelegate
+            .get(_webFirestoreDelegate.doc(documentPath));
+        return convertWebDocumentSnapshot(_firestore, webDocumentSnapshot);
+      },
+    );
   }
 
   @override
-  TransactionWeb set(String documentPath, Map<String, dynamic> data,
-      [SetOptions options]) {
-    _webTransactionDelegate.set(_webFirestoreDelegate.doc(documentPath),
-        CodecUtility.encodeMapData(data), convertSetOptions(options));
+  TransactionWeb set(
+    String documentPath,
+    Map<String, dynamic> data, [
+    SetOptions? options,
+  ]) {
+    _webTransactionDelegate.set(
+      _webFirestoreDelegate.doc(documentPath),
+      EncodeUtility.encodeMapData(data)!,
+      convertSetOptions(options),
+    );
     return this;
   }
 
@@ -52,8 +58,10 @@ class TransactionWeb extends TransactionPlatform {
     String documentPath,
     Map<String, dynamic> data,
   ) {
-    _webTransactionDelegate.update(_webFirestoreDelegate.doc(documentPath),
-        data: CodecUtility.encodeMapData(data));
+    _webTransactionDelegate.update(
+      _webFirestoreDelegate.doc(documentPath),
+      EncodeUtility.encodeMapData(data)!,
+    );
     return this;
   }
 }

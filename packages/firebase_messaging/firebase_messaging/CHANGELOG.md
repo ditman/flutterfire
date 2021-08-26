@@ -1,3 +1,141 @@
+## 10.0.6
+
+ - **FIX**: revert onMessage event handler commit which causes another bug (#6878).
+ - **FIX**: allow messages when device is in idle mode (#6730).
+ - **FIX**: onMessage event handler for notifcations with `contentAvailable:true` (#6838).
+
+## 10.0.5
+
+ - Update a dependency to the latest release.
+
+## 10.0.4
+
+ - **DOCS**: update web example in line with flutter 2.2.0 generated `index.html` (#6398).
+ - **CHORE**: update v2 embedding support (#6506).
+ - **CHORE**: rm deprecated jcenter repository (#6431).
+
+## 10.0.3
+
+ - **DOCS**: update web example in line with flutter 2.2.0 generated `index.html` (#6398).
+ - **CHORE**: rm deprecated jcenter repository (#6431).
+
+## 10.0.2
+
+ - Update a dependency to the latest release.
+
+## 10.0.1
+
+ - **FIX**: Fix FirebaseMessaging.onMessage and onMessageOpenedApp potentially throwing (#6093).
+ - **DOCS**: Add Flutter Favorite badge (#6190).
+ - **CHORE**: fix broken messaging example (#6176).
+
+## 10.0.0
+
+> Note: This release has breaking changes.
+
+ - **BREAKING** **REFACTOR**: remove support for `senderId` named argument on `getToken` & `deleteToken` methods since the native Firebase SDKs no longer support it cross-platform.
+ - **FEAT**: implement `isSupported` support for Web (#6109).
+ - **FEAT**: upgrade Firebase JS SDK version to 8.6.1.
+ - **FIX**: podspec osx version checking script should use a version range instead of a single fixed version.
+
+## 9.1.4
+
+ - Update a dependency to the latest release.
+
+## 9.1.3
+
+ - Update a dependency to the latest release.
+
+## 9.1.2
+
+ - Update a dependency to the latest release.
+
+## 9.1.1
+
+ - Update a dependency to the latest release.
+
+## 9.1.0
+
+ - **FEAT**: android.tag property on Notification (#5452).
+ - **CHORE**: bump min Dart SDK constraint to 2.12.0 (#5430).
+ - **CHORE**: publish packages (#5429).
+ - **CHORE**: merge all analysis_options.yaml into one (#5329).
+ - **CHORE**: publish packages.
+ - **CHORE**: rm dev dependencies breaking CI (#5221).
+
+## 9.0.1
+
+ - Update a dependency to the latest release.
+
+## 9.0.0
+
+ - Graduate package to a stable release. See pre-releases prior to this version for changelog entries.
+
+## 9.0.0-1.0.nullsafety.2
+
+ - **FIX**: fix unhandled exception  (#4676).
+
+## 9.0.0-1.0.nullsafety.1
+
+ - **TESTS**: update mockito API usage in tests
+
+## 9.0.0-1.0.nullsafety.0
+
+> Note: This release has breaking changes.
+
+ - **BREAKING** **REFACTOR**: migrate to NNBD (#4909).
+ - **BREAKING**: the following deprecated APIs have been removed:
+    - `iOSNotificationSettings`.
+    - `requestNotificationPermissions` - use `requestPermission` instead.
+    - `autoInitEnabled()` - use `setAutoInitEnabled()` instead.
+    - `deleteInstanceID()` - use `deleteToken()` instead.
+    - `FirebaseMessaging()` - use `FirebaseMessaging.instance` instead.
+
+
+## 8.0.0-dev.14
+
+ - **DOCS**: fix messaging regex examples (#4649).
+
+## 8.0.0-dev.13
+
+> Note: This release has breaking changes.
+
+ - **FEAT**: add check on podspec to assist upgrading users deployment target.
+ - **BUILD**: commit Podfiles with 10.12 deployment target.
+ - **BUILD**: remove default sdk version, version should always come from firebase_core, or be user defined.
+ - **BUILD**: set macOS deployment target to 10.12 (from 10.11).
+ - **BREAKING** **BUILD**: set osx min supported platform version to 10.12.
+
+## 8.0.0-dev.12
+
+> Note: This release has breaking changes.
+
+ - **FIX**: Add missing sdk version constraints inside pubspec.yaml (#4604).
+ - **FEAT**: bump firebase-android-sdk BoM to 25.13.0.
+ - **CHORE**: harmonize dependencies and version handling.
+ - **BREAKING** **FEAT**: forward port to firebase-ios-sdk v7.3.0.
+   - Due to this SDK upgrade, iOS 10 is now the minimum supported version by FlutterFire. Please update your build target version.
+
+## 8.0.0-dev.11
+
+ - **REFACTOR**: initial web release as pre-release version.
+ - **FIX**: manually create a `FlutterShellArgs` instance from Android activity intent (fixes #4078) (#4341).
+ - **FIX**: fixed callback handler type casting on Android (#4313).
+ - **FIX**: macOS should not use `FIRAuth canHandleNotification` as it's iOS only (fixes #4136) (#4340).
+ - **FIX**: some iOS methods could result in an `no implementation found` error (#4339).
+
+## 8.0.0-dev.10
+
+ - **FEAT**: web implementation (#4206).
+ - **FEAT**: bump android `com.android.tools.build` & `'com.google.gms:google-services` versions (#4269).
+
+## 8.0.0-dev.9
+
+ - **TEST**: Explicitly opt-out from null safety.
+ - **FIX**: various data types issues in remote message (#4150).
+ - **FIX**: java String arrays should be converted to a List (fixes #4072) (#4092).
+ - **CHORE**: bump gradle wrapper to 5.6.4 (#4158).
+
 ## 8.0.0-dev.8
 
  - **FIX**: potential crash (fixes #4032) (#4071).

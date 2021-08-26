@@ -1,3 +1,6 @@
+// ignore_for_file: require_trailing_commas
+// @dart=2.9
+
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
@@ -28,7 +31,11 @@ class _TokenMonitor extends State<TokenMonitor> {
   @override
   void initState() {
     super.initState();
-    FirebaseMessaging.instance.getToken().then(setToken);
+    FirebaseMessaging.instance
+        .getToken(
+            vapidKey:
+                'BGpdLRsMJKvFDD9odfPk92uBg-JbQbyoiZdah0XlUyrjG4SDgUsE1iC_kdRgt4Kn0CO7K3RTswPZt61NNuO0XoA')
+        .then(setToken);
     _tokenStream = FirebaseMessaging.instance.onTokenRefresh;
     _tokenStream.listen(setToken);
   }

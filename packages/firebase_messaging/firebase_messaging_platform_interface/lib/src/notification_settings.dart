@@ -1,3 +1,4 @@
+// ignore_for_file: require_trailing_commas
 // Copyright 2020, the Chromium project authors.  Please see the AUTHORS file
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
@@ -8,15 +9,15 @@ import 'package:firebase_messaging_platform_interface/firebase_messaging_platfor
 class NotificationSettings {
   // ignore: public_member_api_docs
   const NotificationSettings(
-      {this.alert,
-      this.announcement,
-      this.authorizationStatus,
-      this.badge,
-      this.carPlay,
-      this.lockScreen,
-      this.notificationCenter,
-      this.showPreviews,
-      this.sound});
+      {required this.alert,
+      required this.announcement,
+      required this.authorizationStatus,
+      required this.badge,
+      required this.carPlay,
+      required this.lockScreen,
+      required this.notificationCenter,
+      required this.showPreviews,
+      required this.sound});
 
   /// Whether or not messages containing a notification will alert the user.
   ///

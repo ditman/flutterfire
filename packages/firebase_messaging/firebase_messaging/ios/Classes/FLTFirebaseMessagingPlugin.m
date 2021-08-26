@@ -86,7 +86,6 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
       details = @{
         kMessagingArgumentCode : code,
         kMessagingArgumentMessage : message,
-        kMessagingArgumentAdditionalData : @{},
       };
     }
 
@@ -114,8 +113,7 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
                  isEqualToString:call.method]) {
     [self messagingSetForegroundNotificationPresentationOptions:call.arguments
                                            withMethodCallResult:methodCallResult];
-  }
-  if ([@"Messaging#getToken" isEqualToString:call.method]) {
+  } else if ([@"Messaging#getToken" isEqualToString:call.method]) {
     [self messagingGetToken:call.arguments withMethodCallResult:methodCallResult];
   } else if ([@"Messaging#getNotificationSettings" isEqualToString:call.method]) {
     if (@available(iOS 10, macOS 10.14, *)) {
@@ -165,7 +163,7 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
 #pragma mark - Firebase Messaging Delegate
 
 - (void)messaging:(nonnull FIRMessaging *)messaging
-    didReceiveRegistrationToken:(nonnull NSString *)fcmToken {
+    didReceiveRegistrationToken:(nullable NSString *)fcmToken {
   // Don't crash if the token is reset.
   if (fcmToken == nil) {
     return;
@@ -397,11 +395,6 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
 #if TARGET_OS_OSX
 - (void)application:(NSApplication *)application
     didReceiveRemoteNotification:(NSDictionary *)userInfo {
-#if __has_include(<FirebaseAuth/FirebaseAuth.h>)
-  if ([[FIRAuth auth] canHandleNotification:userInfo]) {
-    return YES;
-  }
-#endif
   // Only handle notifications from FCM.
   if (userInfo[@"gcm.message_id"]) {
     NSDictionary *notificationDict =
@@ -599,18 +592,13 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
 
 - (void)messagingGetToken:(id)arguments withMethodCallResult:(FLTFirebaseMethodCallResult *)result {
   FIRMessaging *messaging = [FIRMessaging messaging];
-  NSString *senderId = arguments[@"senderId"];
-  if ([senderId isEqual:[NSNull null]]) {
-    senderId = [FIRApp defaultApp].options.GCMSenderID;
-  }
-  [messaging retrieveFCMTokenForSenderID:senderId
-                              completion:^(NSString *token, NSError *error) {
-                                if (error != nil) {
-                                  result.error(nil, nil, nil, error);
-                                } else {
-                                  result.success(@{@"token" : token});
-                                }
-                              }];
+  [messaging tokenWithCompletion:^(NSString *_Nullable token, NSError *_Nullable error) {
+    if (error != nil) {
+      result.error(nil, nil, nil, error);
+    } else {
+      result.success(@{@"token" : token});
+    }
+  }];
 }
 
 - (void)messagingGetAPNSToken:(id)arguments
@@ -626,18 +614,13 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
 - (void)messagingDeleteToken:(id)arguments
         withMethodCallResult:(FLTFirebaseMethodCallResult *)result {
   FIRMessaging *messaging = [FIRMessaging messaging];
-  NSString *senderId = arguments[@"senderId"];
-  if ([senderId isEqual:[NSNull null]]) {
-    senderId = [FIRApp defaultApp].options.GCMSenderID;
-  }
-  [messaging deleteFCMTokenForSenderID:senderId
-                            completion:^(NSError *error) {
-                              if (error != nil) {
-                                result.error(nil, nil, nil, error);
-                              } else {
-                                result.success(nil);
-                              }
-                            }];
+  [messaging deleteTokenWithCompletion:^(NSError *_Nullable error) {
+    if (error != nil) {
+      result.error(nil, nil, nil, error);
+    } else {
+      result.success(nil);
+    }
+  }];
 }
 
 #pragma mark - FLTFirebasePlugin
@@ -983,7 +966,6 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
     return @{
       kMessagingArgumentCode : code,
       kMessagingArgumentMessage : message,
-      kMessagingArgumentAdditionalData : @{},
     };
   }
 
@@ -1018,7 +1000,6 @@ NSString *const kMessagingPresentationOptionsUserDefaults =
   return @{
     kMessagingArgumentCode : code,
     kMessagingArgumentMessage : message,
-    kMessagingArgumentAdditionalData : @{},
   };
 }
 

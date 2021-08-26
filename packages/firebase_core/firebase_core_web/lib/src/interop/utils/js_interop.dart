@@ -1,3 +1,4 @@
+// ignore_for_file: require_trailing_commas
 // Copyright 2020 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -20,12 +21,16 @@ external List<String> objectKeys(Object obj);
 @JS('Array.from')
 external Object toJSArray(List source);
 
-DateTime dartifyDate(Object jsObject) {
+DateTime? dartifyDate(Object jsObject) {
   if (util.hasProperty(jsObject, 'toDateString')) {
     try {
       var date = jsObject as dynamic;
+      // ignore: avoid_dynamic_calls
       return DateTime.fromMillisecondsSinceEpoch(date.getTime());
-    } on NoSuchMethodError {
+    }
+    // TODO(rrousselGit): document why try/catch is needed here or find an alternative
+    // ignore: avoid_catching_errors
+    on NoSuchMethodError {
       // so it's not a JsDate!
       return null;
     }

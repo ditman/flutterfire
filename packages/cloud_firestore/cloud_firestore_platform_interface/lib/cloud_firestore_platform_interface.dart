@@ -1,3 +1,4 @@
+// ignore_for_file: require_trailing_commas
 // Copyright 2017, the Chromium project authors.  Please see the AUTHORS file
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
@@ -21,6 +22,8 @@ export 'src/platform_interface/platform_interface_query.dart';
 export 'src/platform_interface/platform_interface_query_snapshot.dart';
 export 'src/platform_interface/platform_interface_transaction.dart';
 export 'src/platform_interface/platform_interface_write_batch.dart';
+export 'src/platform_interface/platform_interface_load_bundle_task.dart';
+export 'src/platform_interface/platform_interface_load_bundle_task_snapshot.dart';
 export 'src/snapshot_metadata.dart';
 export 'src/source.dart';
 export 'src/timestamp.dart';
@@ -28,6 +31,8 @@ export 'src/settings.dart';
 export 'src/get_options.dart';
 export 'src/set_options.dart';
 export 'src/persistence_settings.dart';
+export 'src/load_bundle_task_state.dart';
+export 'src/platform_interface/utils/load_bundle_task_state.dart';
 
 /// Helper method exposed to determine whether a given [collectionPath] points to
 /// a valid Firestore collection.

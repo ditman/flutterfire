@@ -17,8 +17,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.FirebaseApp;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.iid.Metadata;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.RemoteMessage;
 import io.flutter.embedding.engine.FlutterShellArgs;
@@ -142,28 +140,20 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver
     }
   }
 
-  private Task<Void> deleteToken(Map<String, Object> arguments) {
+  private Task<Void> deleteToken() {
     return Tasks.call(
         cachedThreadPool,
         () -> {
-          String senderId =
-              arguments.get("senderId") != null
-                  ? (String) arguments.get("senderId")
-                  : Metadata.getDefaultSenderId(FirebaseApp.getInstance());
-          FirebaseInstanceId.getInstance().deleteToken(senderId, "*");
+          Tasks.await(FirebaseMessaging.getInstance().deleteToken());
           return null;
         });
   }
 
-  private Task<Map<String, Object>> getToken(Map<String, Object> arguments) {
+  private Task<Map<String, Object>> getToken() {
     return Tasks.call(
         cachedThreadPool,
         () -> {
-          String senderId =
-              arguments.get("senderId") != null
-                  ? (String) arguments.get("senderId")
-                  : Metadata.getDefaultSenderId(FirebaseApp.getInstance());
-          String token = FirebaseInstanceId.getInstance().getToken(senderId, "*");
+          String token = Tasks.await(FirebaseMessaging.getInstance().getToken());
           return new HashMap<String, Object>() {
             {
               put("token", token);
@@ -289,16 +279,33 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver
         // method channels.
       case "Messaging#startBackgroundIsolate":
         @SuppressWarnings("unchecked")
-        long pluginCallbackHandle =
-            (long) ((Map<String, Object>) call.arguments).get("pluginCallbackHandle");
-        @SuppressWarnings("unchecked")
-        long userCallbackHandle =
-            (long) ((Map<String, Object>) call.arguments).get("userCallbackHandle");
+        Map<String, Object> arguments = ((Map<String, Object>) call.arguments);
+
+        long pluginCallbackHandle = 0;
+        long userCallbackHandle = 0;
+
+        Object arg1 = arguments.get("pluginCallbackHandle");
+        Object arg2 = arguments.get("userCallbackHandle");
+
+        if (arg1 instanceof Long) {
+          pluginCallbackHandle = (Long) arg1;
+        } else {
+          pluginCallbackHandle = Long.valueOf((Integer) arg1);
+        }
+
+        if (arg2 instanceof Long) {
+          userCallbackHandle = (Long) arg2;
+        } else {
+          userCallbackHandle = Long.valueOf((Integer) arg2);
+        }
 
         FlutterShellArgs shellArgs = null;
         if (mainActivity != null) {
-          shellArgs =
-              ((io.flutter.embedding.android.FlutterActivity) mainActivity).getFlutterShellArgs();
+          // Supports both Flutter Activity types:
+          //    io.flutter.embedding.android.FlutterFragmentActivity
+          //    io.flutter.embedding.android.FlutterActivity
+          // We could use `getFlutterShellArgs()` but this is only available on `FlutterActivity`.
+          shellArgs = FlutterShellArgs.fromIntent(mainActivity.getIntent());
         }
 
         FlutterFirebaseMessagingBackgroundService.setCallbackDispatcher(pluginCallbackHandle);
@@ -311,10 +318,10 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver
         methodCallTask = getInitialMessage(call.arguments());
         break;
       case "Messaging#deleteToken":
-        methodCallTask = deleteToken(call.arguments());
+        methodCallTask = deleteToken();
         break;
       case "Messaging#getToken":
-        methodCallTask = getToken(call.arguments());
+        methodCallTask = getToken();
         break;
       case "Messaging#subscribeToTopic":
         methodCallTask = subscribeToTopic(call.arguments());
@@ -355,7 +362,7 @@ public class FlutterFirebaseMessagingPlugin extends BroadcastReceiver
     } else {
       details.put("message", "An unknown error has occurred.");
     }
-    details.put("additionalData", new HashMap<>());
+
     return details;
   }
 

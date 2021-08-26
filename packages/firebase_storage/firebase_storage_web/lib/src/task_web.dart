@@ -1,34 +1,32 @@
+// ignore_for_file: require_trailing_commas
 // Copyright 2017, the Chromium project authors.  Please see the AUTHORS file
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:async';
+
 import 'package:async/async.dart';
-
-import 'package:firebase/firebase.dart' as fb;
 import 'package:firebase_storage_platform_interface/firebase_storage_platform_interface.dart';
-import 'package:firebase_storage_web/src/utils/errors.dart';
 
+import 'interop/storage.dart' as storage_interop;
+import 'utils/errors.dart';
 import 'utils/task.dart';
 
 /// The web platform implementation of an (Upload)Task.
-/// This class wraps a proper [fb.UploadTask] and exposes bindings
+/// This class wraps a proper [storage_interop.UploadTask] and exposes bindings
 /// to its functionality: Stream of changes, a Future notifying of
 /// success/errors, and pause/resume/cancel methods.
 class TaskWeb extends TaskPlatform {
-  final ReferencePlatform _reference;
-
-  final fb.UploadTask _task;
-
-  Future<TaskSnapshotPlatform> _onComplete;
-  Stream<TaskSnapshotPlatform> _snapshotEvents;
-
-  /// Creates a Task for web from a [ReferencePlatform] object and a native [fb.UploadTask].
+  /// Creates a Task for web from a [ReferencePlatform] object and a native [storage_interop.UploadTask].
   /// The `reference` is used when creating [TaskSnapshotWeb] of this task.
-  TaskWeb(ReferencePlatform reference, fb.UploadTask task)
+  TaskWeb(ReferencePlatform reference, storage_interop.UploadTask task)
       : _reference = reference,
         _task = task,
         super();
+
+  final ReferencePlatform _reference;
+
+  final storage_interop.UploadTask _task;
 
   /// Returns a [Stream] of [TaskSnapshot] events.
   ///
@@ -39,27 +37,25 @@ class TaskWeb extends TaskPlatform {
   /// wait for the stream to complete via [onComplete].
   @override
   Stream<TaskSnapshotPlatform> get snapshotEvents {
-    if (_snapshotEvents == null) {
+    return guard(() {
       // The mobile version of the plugin pushes a "success" snapshot to the
       // onStateChanged stream, but the Firebase JS SDK does *not*.
       // We use a StreamGroup + Future.asStream to simulate that feature:
+      // ignore: close_sinks
       final group = StreamGroup<TaskSnapshotPlatform>.broadcast();
 
       // This stream converts the UploadTask Snapshots from JS to the plugins'
       // It can also throw a FirebaseError internally, so we handle it.
-      final onStateChangedStream = _task.onStateChanged
-          .map<TaskSnapshotPlatform>((snapshot) =>
-              fbUploadTaskSnapshotToTaskSnapshot(_reference, snapshot))
-          .handleError((e) {
-        throw getFirebaseException(e);
+      final onStateChangedStream =
+          _task.onStateChanged.map<TaskSnapshotPlatform>((snapshot) {
+        return fbUploadTaskSnapshotToTaskSnapshot(_reference, snapshot);
       });
 
       group.add(onStateChangedStream);
       group.add(onComplete.asStream());
 
-      _snapshotEvents = group.stream;
-    }
-    return _snapshotEvents;
+      return group.stream;
+    });
   }
 
   /// Returns a [Future] once the task has completed.
@@ -68,21 +64,12 @@ class TaskWeb extends TaskPlatform {
   /// completion event via [snapshotEvents].
   @override
   Future<TaskSnapshotPlatform> get onComplete {
-    if (_onComplete == null) {
-      // This future represents the internal state of the Task.
-      // It not only signals when the Task is done, but also when it fails.
-      // The frontend Task uses _delegate.onComplete when implementing the
-      // Future interface, so we must ensure we reject with the correct
-      // type of Exception.
-      _onComplete = _task.future
-          .then<TaskSnapshotPlatform>(
-        (snapshot) => fbUploadTaskSnapshotToTaskSnapshot(_reference, snapshot),
-      )
-          .catchError((e) {
-        throw getFirebaseException(e);
-      });
-    }
-    return _onComplete;
+    return guard(() async {
+      return fbUploadTaskSnapshotToTaskSnapshot(
+        _reference,
+        await _task.future,
+      );
+    });
   }
 
   /// The latest [TaskSnapshot] for this task.

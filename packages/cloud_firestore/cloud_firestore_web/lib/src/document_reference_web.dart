@@ -1,11 +1,13 @@
+// ignore_for_file: require_trailing_commas
 // Copyright 2017, the Chromium project authors.  Please see the AUTHORS file
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
 import 'package:cloud_firestore_platform_interface/cloud_firestore_platform_interface.dart';
-import 'utils/exception.dart';
+
+import 'internals.dart';
 import 'utils/web_utils.dart';
-import 'utils/codec_utility.dart';
+import 'utils/encode_utility.dart';
 import 'interop/firestore.dart' as firestore_interop;
 
 /// Web implementation for Firestore [DocumentReferencePlatform].
@@ -26,44 +28,33 @@ class DocumentReferenceWeb extends DocumentReferencePlatform {
         super(firestore, path);
 
   @override
-  Future<void> set(Map<String, dynamic> data, [SetOptions options]) async {
-    try {
-      await _delegate.set(
-        CodecUtility.encodeMapData(data),
+  Future<void> set(Map<String, dynamic> data, [SetOptions? options]) {
+    return guard(
+      () => _delegate.set(
+        EncodeUtility.encodeMapData(data)!,
         convertSetOptions(options),
-      );
-    } catch (e) {
-      throw getFirebaseException(e);
-    }
+      ),
+    );
   }
 
   @override
-  Future<void> update(Map<String, dynamic> data) async {
-    try {
-      await _delegate.update(data: CodecUtility.encodeMapData(data));
-    } catch (e) {
-      throw getFirebaseException(e);
-    }
+  Future<void> update(Map<String, dynamic> data) {
+    return guard(() => _delegate.update(EncodeUtility.encodeMapData(data)!));
   }
 
   @override
-  Future<DocumentSnapshotPlatform> get([GetOptions options]) async {
-    try {
-      firestore_interop.DocumentSnapshot documentSnapshot =
-          await _delegate.get(convertGetOptions(options));
-      return convertWebDocumentSnapshot(this.firestore, documentSnapshot);
-    } catch (e) {
-      throw getFirebaseException(e);
-    }
+  Future<DocumentSnapshotPlatform> get(
+      [GetOptions options = const GetOptions()]) async {
+    firestore_interop.DocumentSnapshot documentSnapshot = await guard(
+      () => _delegate.get(convertGetOptions(options)),
+    );
+
+    return convertWebDocumentSnapshot(firestore, documentSnapshot);
   }
 
   @override
-  Future<void> delete() async {
-    try {
-      await _delegate.delete();
-    } catch (e) {
-      throw getFirebaseException(e);
-    }
+  Future<void> delete() {
+    return guard(_delegate.delete);
   }
 
   @override
@@ -75,11 +66,11 @@ class DocumentReferenceWeb extends DocumentReferencePlatform {
     if (includeMetadataChanges) {
       querySnapshots = _delegate.onMetadataChangesSnapshot;
     }
-    return querySnapshots
-        .map((webSnapshot) =>
-            convertWebDocumentSnapshot(this.firestore, webSnapshot))
-        .handleError((e) {
-      throw getFirebaseException(e);
-    });
+
+    return guard(
+      () => querySnapshots.map((webSnapshot) {
+        return convertWebDocumentSnapshot(firestore, webSnapshot);
+      }),
+    );
   }
 }
